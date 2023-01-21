@@ -20,24 +20,24 @@ type Field struct {
 	State GameState
 }
 
-func (f Field) GetWidth() int {
+func (f *Field) GetWidth() int {
 	return f.width
 }
 
-func (f Field) GetHeight() int {
+func (f *Field) GetHeight() int {
 	return f.height
 }
 
-func (f Field) GetCell(x, y int) *Cell {
+func (f *Field) GetCell(x, y int) *Cell {
 	return &f.cells[y*f.height+x]
 }
 
-func (f Field) GetState() GameState {
+func (f *Field) GetState() GameState {
 	return f.State
 }
 
 // walkNeighbours() walks over all 8 neighbours and runs worker() for each,
-func (f Field) walkNeighbours(x, y int, worker func(*Cell)) {
+func (f *Field) walkNeighbours(x, y int, worker func(*Cell)) {
 	// determine real boundaries of the neighbourhood considering field borders
 	xStart := int(math.Max(float64(x-1), 0))
 	xEnd := int(math.Min(float64(x+1), float64(f.width-1)))
@@ -54,7 +54,7 @@ func (f Field) walkNeighbours(x, y int, worker func(*Cell)) {
 	}
 }
 
-func (f Field) IsFillable(x, y int) bool {
+func (f *Field) IsFillable(x, y int) bool {
 	// if cell has been open - it should not take part in free-area roll down,
 	// as wel las if it is a Hole - holes are handled in the fill() immediatelly
 	pc := f.GetCell(x, y)
@@ -80,12 +80,53 @@ func (f Field) IsFillable(x, y int) bool {
 }
 
 // Fill() will be called only if IsFillable() satisfied - so we don't need to do additional checks
-func (f Field) Fill(x, y int) {
+func (f *Field) Fill(x, y int) {
 	pc := f.GetCell(x, y)
 	pc.State = CellStateOpen
 	f.openCells++
 	// if all cells are open exept holes, the nwe won 
 	// - this will be processed at a higher level in OpenCell()
+}
+
+// OpenCell opens a cell on the field and changes game state if it is a Hole.
+// If the cell has no adjacent holes (clear-free cell), then all free region is opened
+func (f *Field) OpenCell(p Point) GameState {	
+	pc := f.GetCell(p.X, p.Y)
+
+	if pc.State == CellStateOpen {
+		// cell is already opened
+		return 0
+	}
+
+	if pc.HolesNumber == ThisIsHoleMarker {
+		// now, we have to reveal all holes:
+		for _, ph := range f.holesRefs {
+			ph.State = CellStateOpen
+			f.openCells++
+		}
+
+		f.State = GameStateLoose
+		// game state is clear - return
+		return f.State
+	}
+
+	if pc.HolesNumber > 0 {
+		// this is a hole-adjacent cell, we should open just it
+		pc.State = CellStateOpen
+		f.openCells++
+
+	} else /*if f.Holes == 0*/ {
+		// f.Holes == 0 - this is a clear-free (non-adjacent) cell, 
+		// we should flood-fill adjacent free cells and its border with open action
+		FloodFill(p.X, p.Y, f)	
+	}
+
+	if f.openCells >= len(f.cells) - len(f.holesRefs) {
+		// all have been open except holes - we Won!!!
+		f.State = GameStateWin
+	}
+
+	return f.State
 }
 
 // NewField constructs a new game field
@@ -140,47 +181,6 @@ func NewField(height, width, holesNumber int) (*Field, error) {
 	}
 
 	return pfield, nil
-}
-
-// OpenCell opens a cell on the field and changes game state if it is a Hole.
-// If the cell has no adjacent holes (clear-free cell), then all free region is opened
-func (f Field) OpenCell(p Point) GameState {	
-	pc := f.GetCell(p.X, p.Y)
-
-	if pc.State == CellStateOpen {
-		// cell is already opened
-		return 0
-	}
-
-	if pc.HolesNumber == ThisIsHoleMarker {
-		// now, we have to reveal all holes:
-		for _, ph := range f.holesRefs {
-			ph.State = CellStateOpen
-			f.openCells++
-		}
-
-		f.State = GameStateLoose
-		// game state is clear - return
-		return f.State
-	}
-
-	if pc.HolesNumber > 0 {
-		// this is a hole-adjacent cell, we should open just it
-		pc.State = CellStateOpen
-		f.openCells++
-
-	} else /*if f.Holes == 0*/ {
-		// f.Holes == 0 - this is a clear-free (non-adjacent) cell, 
-		// we should flood-fill adjacent free cells and its border with open action
-		FloodFill(p.X, p.Y, f)	
-	}
-
-	if f.openCells >= len(f.cells) - len(f.holesRefs) {
-		// all have been open except holes - we Won!!!
-		f.State = GameStateWin
-	}
-
-	return f.State
 }
 
 

@@ -1,5 +1,7 @@
 package main
 
+// Very simple terminal UI for the game
+
 import (
 	"bufio"
 	"fmt"
