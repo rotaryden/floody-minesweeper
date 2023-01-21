@@ -1,0 +1,11 @@
+#*#
+*.dll
+*.dylib
+*.exe
+*.out
+*.log
+*.so
+*.swp
+*.test
+.vscode
+build/
