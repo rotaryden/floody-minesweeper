@@ -37,7 +37,8 @@ func (f *Field) GetState() GameState {
 }
 
 // walkNeighbours() walks over all 8 neighbours and runs worker() for each,
-func (f *Field) walkNeighbours(x, y int, worker func(*Cell)) {
+// unnless worker() returns true before
+func (f *Field) walkNeighbours(x, y int, worker func(*Cell) bool) {
 	// determine real boundaries of the neighbourhood considering field borders
 	xStart := int(math.Max(float64(x-1), 0))
 	xEnd := int(math.Min(float64(x+1), float64(f.width-1)))
@@ -48,7 +49,9 @@ func (f *Field) walkNeighbours(x, y int, worker func(*Cell)) {
 		for dx := xStart; dx <= int(xEnd); dx++ {
 			// omit current cell
 			if dx != x || dy != y {
-				worker(f.GetCell(dx, dy))
+				if worker(f.GetCell(dx, dy)) {
+					return
+				}
 			}
 		}
 	}
@@ -67,16 +70,31 @@ func (f *Field) IsFillable(x, y int) bool {
 		return true
 	}
 
-	// but if it is a hole-adjacent cell with a counter - whe should make sure it is adjacent also to a clear free cell
+	// but if it is a hole-adjacent cell with a counter - whe should make sure it is adjacent also to a clear-free (non-adjacent) cell
+	// moreover, this cell should be open to mitigate situations like this (h3 is ahjacent to 2 independent free regions):
+	// 	   a b c d e f g h i j
+	//  0 🙫 2 🙫 1 ⛶ ⛶ ⛶ 1 🙫 🙫 
+	//  1 🙫 3 1 1 ⛶ ⛶ ⛶ 1 🙫 🙫 
+	//  2 🙫 1 ⛶ ⛶ ⛶ ⛶ ⛶ 1 🙫 🙫 
+	//  3 🙫 2 1 1 1 1 1 1 1 1          <<<-----
+	//  4 🙫 🙫 🙫 🙫 🙫 🙫 🙫 1 ⛶ ⛶ 
+	//  5 🙫 🙫 🙫 🙫 🙫 2 🙫 3 2 1 
+	//  6 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 
+	//  7 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 
+	//  8 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 
+	//  9 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 
+
 	// this way we will expand only to the borders (with counters) of the free area, no more
-	freeNeighborsNumber := 0
-	f.walkNeighbours(x, y, func(c *Cell) {
-		if c.HolesNumber == 0 {
-			freeNeighborsNumber++
+	hasFreeOpenNeighbour := false
+	f.walkNeighbours(x, y, func(c *Cell) bool {
+		if c.HolesNumber == 0 && c.State == CellStateOpen {
+			hasFreeOpenNeighbour = true
+			return true //stop walking through neighbours
 		}
+		return false
 	})
 
-	return freeNeighborsNumber > 0
+	return hasFreeOpenNeighbour
 }
 
 // Fill() will be called only if IsFillable() satisfied - so we don't need to do additional checks
@@ -173,11 +191,12 @@ func NewField(height, width, holesNumber int) (*Field, error) {
 				holeIndex++
 
 				// increment hole-adjacent cells' counters
-				pfield.walkNeighbours(x, y, func(pcc *Cell) {
+				pfield.walkNeighbours(x, y, func(pcc *Cell) bool {
 					// if this is not a hole - increase it hole-adjacent counter
 					if pcc.HolesNumber != ThisIsHoleMarker {
 						pcc.HolesNumber++
 					}
+					return false
 				})
 			}
 		}

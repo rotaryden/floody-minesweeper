@@ -32,11 +32,7 @@ func printField(f IField) {
 			switch {
 			case pc.State == CellStateClosed:
 				// add space after placeholder "%s " to fix wide rune printing issue
-				if pc.HolesNumber < 50 {
-					fmt.Printf("%d ", pc.HolesNumber)  //TODO remove
-				} else {
-					fmt.Printf("%c ", '🙫')
-				}
+				fmt.Printf("%c ", '🙫')
 			case pc.HolesNumber == ThisIsHoleMarker:
 				fmt.Printf("%c ", '⦿')
 			case pc.HolesNumber == 0:
