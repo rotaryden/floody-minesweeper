@@ -65,7 +65,7 @@ https://lodev.org/cgtutor/floodfill.html
 
 
 ## Bonus: bug screens
-fixed_bugs/*.png - some flood-fill/IsFillable() bugs I had to mitigate during development 
+screenshots/fixed_bug*.png - some flood-fill/IsFillable() bugs I had to mitigate during development 
 
 ## Copyright
 
