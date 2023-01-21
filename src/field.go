@@ -106,6 +106,12 @@ func (f *Field) Fill(x, y int) {
 	// - this will be processed at a higher level in OpenCell()
 }
 
+func (f *Field) revealHoles() {	
+	for _, h := range f.holesRefs {
+		h.State = CellStateOpen
+	}
+}
+
 // OpenCell opens a cell on the field and changes game state if it is a Hole.
 // If the cell has no adjacent holes (clear-free cell), then all free region is opened
 func (f *Field) OpenCell(p Point) GameState {	
@@ -118,10 +124,7 @@ func (f *Field) OpenCell(p Point) GameState {
 
 	if pc.HolesNumber == ThisIsHoleMarker {
 		// now, we have to reveal all holes:
-		for _, ph := range f.holesRefs {
-			ph.State = CellStateOpen
-			f.openCells++
-		}
+		f.revealHoles()
 
 		f.State = GameStateLoose
 		// game state is clear - return
@@ -142,6 +145,8 @@ func (f *Field) OpenCell(p Point) GameState {
 	if f.openCells >= len(f.cells) - len(f.holesRefs) {
 		// all have been open except holes - we Won!!!
 		f.State = GameStateWin
+		// yet still good to show all holes
+		f.revealHoles()  
 	}
 
 	return f.State
