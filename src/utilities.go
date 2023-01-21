@@ -1,51 +1,48 @@
 package main
 
+import "sync"
+
 // Simple implementation of the Stack using Single-Linked list and Mutex for concurrency - enough for the task, theoretically more efficient then using Go slices as a stack.
 // Modified code from here: https://stackoverflow.com/a/40441569
 
-import (
-	"sync"
-)
-
-type element[T any] struct {
+type elementType[T any] struct {
 	data T
-	next *element[T]
+	next *elementType[T]
 }
 
 // Stack would be generic on elements data type, to avoid interface{}
 type Stack[T any] struct {
-	lock *sync.Mutex
-	head *element[T]
+	lock sync.Mutex
+	head *elementType[T]
 	Size int
 }
 
 // Push() puts data on top of the stack. As stack is unlimited (list-based), we dont need error/ok values here (at least for naive implementation)
-func (stk Stack[T]) Push(data T) {
+func (stk *Stack[T]) Push(data T) {
 	stk.lock.Lock()
+	defer stk.lock.Unlock()
 
-	element := new(element[T])
-	element.data = data
+	el := &elementType[T]{data: data}
 	temp := stk.head
-	element.next = temp
-	stk.head = element
+	el.next = temp
+	stk.head = el
 	stk.Size++
 
-	stk.lock.Unlock()
 }
 
 // Pop() removes and returnes data from the to pof the stack.
 // Will return ok = false in case of error - just like e.g. we do for maps : el, ok := myMap["somekey"]
-func (stk Stack[T]) Pop() (T, bool) {
+func (stk *Stack[T]) Pop() (T, bool) {
 	if stk.head == nil {
 		var t T
 		return t, false
 	}
 	stk.lock.Lock()
+	defer stk.lock.Unlock()
+
 	r := stk.head.data
 	stk.head = stk.head.next
 	stk.Size--
-
-	stk.lock.Unlock()
 
 	return r, true
 }
@@ -55,7 +52,7 @@ func NewStack[T any]() *Stack[T] {
 	return &Stack[T]{
 		head: nil,
 		Size: 0,
-		lock: &sync.Mutex{},
+		lock: sync.Mutex{},
 	}
 }
 
@@ -85,7 +82,7 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 
 	stack := NewStack[Point]()
 
-	// Point is a small structure, store by-value
+	// Point is a small structure without side effects, store by-value
 	stack.Push(Point{x, y})
 
 	for point, ok := stack.Pop(); ok; point, ok = stack.Pop() {
