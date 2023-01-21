@@ -72,21 +72,6 @@ const (
 	FillEventNothingToFill
 )
 
-// IFloodableField interface is an abstruction of the game field, owns states of cells
-// This abstraction allows to flood-fill game fields with different logic over cells
-// (logic in our case: 
-//	  we need to flood-fill all clear-free cells + cells with countrs on the closure border of the free region)
-// - IsFillable() - test if the cell is fillable (so can be filled with a given state by the fill())
-// - Fill()  - knows how to fill the cell with a new state
-// - GetWidth() int - abstract width
-// - GetHeight() int - abstract height
-type IFloodableField interface {
-	IsFillable(x, y int) bool
-	Fill(x, y int)
-	GetWidth() int
-	GetHeight() int
-}
-
 // Here is an algorithm rewritten in Go from here: https://lodev.org/cgtutor/floodfill.html
 // - x, y int - coordinates of the seed to start from
 // - field - abstract cell field

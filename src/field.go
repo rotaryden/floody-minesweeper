@@ -1,22 +1,11 @@
 package main
 
 import (
+	"errors"
 	"math"
 	"math/rand"
 )
 
-type GameState int
-
-const (
-	GameStateInProgress GameState = iota
-	GameStateLoose
-	GameStateWin
-)
-
-type IField interface {
-	IFloodableField
-	GetCell(int, int) *Cell
-}
 type Field struct {
 	// as we have fixed wodth and height on the start,
 	// cells can be kept in the plain array, index arithmetic asumed: y*width+x,
@@ -41,6 +30,10 @@ func (f Field) GetHeight() int {
 
 func (f Field) GetCell(x, y int) *Cell {
 	return &f.cells[y*f.height+x]
+}
+
+func (f Field) GetState() GameState {
+	return f.State
 }
 
 // walkNeighbours() walks over all 8 neighbours and runs worker() for each,
@@ -96,10 +89,15 @@ func (f Field) Fill(x, y int) {
 }
 
 // NewField constructs a new game field
-func NewField(height, width, holesNumber int) *Field {
+func NewField(height, width, holesNumber int) (*Field, error) {
 	pfield := new(Field)
 	pfield.width = width
 	pfield.height = height
+
+	if holesNumber > height * width {
+		return nil, errors.New("holesNumber > height * width")
+	}
+
 	pfield.State = GameStateInProgress
 	pfield.openCells = 0
 
@@ -141,14 +139,13 @@ func NewField(height, width, holesNumber int) *Field {
 		}
 	}
 
-	return pfield
+	return pfield, nil
 }
 
 // OpenCell opens a cell on the field and changes game state if it is a Hole.
 // If the cell has no adjacent holes (clear-free cell), then all free region is opened
-func (f Field) OpenCell(x, y int) GameState {
-
-	pc := f.GetCell(x, y)
+func (f Field) OpenCell(p Point) GameState {	
+	pc := f.GetCell(p.X, p.Y)
 
 	if pc.State == CellStateOpen {
 		// cell is already opened
@@ -175,7 +172,7 @@ func (f Field) OpenCell(x, y int) GameState {
 	} else /*if f.Holes == 0*/ {
 		// f.Holes == 0 - this is a clear-free (non-adjacent) cell, 
 		// we should flood-fill adjacent free cells and its border with open action
-		FloodFill(x, y, f)	
+		FloodFill(p.X, p.Y, f)	
 	}
 
 	if f.openCells >= len(f.cells) - len(f.holesRefs) {
