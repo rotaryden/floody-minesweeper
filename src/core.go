@@ -5,8 +5,6 @@ import (
 	"math/rand"
 )
 
-const HoleMarker = 1000
-
 type GameState int
 
 const (
@@ -15,30 +13,19 @@ const (
 	GameStateWin
 )
 
-type CellState int
-
-const (
-	CellStateClosed = iota
-	CellStateOpen
-)
-
-type cell struct {
-	State CellState
-	// Holes == 0 - free cell
-	// > 0 < HoleMarker - Hole-adjacent cell
-	// == HoleMarker = is a hole
-	Holes int
+type IField interface {
+	IFloodableField
+	GetCell(int, int) *Cell
 }
-
 type Field struct {
 	// as we have fixed wodth and height on the start,
 	// cells can be kept in the plain array, index arithmetic asumed: y*width+x,
 	// also this form is more efficient shuffling elements etc.
-	cells  []cell
+	cells  []Cell
 	width  int
 	height int
 	// additional list of pointers pairs to the all holes
-	holesRefs []*cell
+	holesRefs []*Cell
 	// simple game state
 	openCells int
 	State GameState
@@ -52,12 +39,12 @@ func (f Field) GetHeight() int {
 	return f.height
 }
 
-func (f Field) getCell(x, y int) *cell {
+func (f Field) GetCell(x, y int) *Cell {
 	return &f.cells[y*f.height+x]
 }
 
 // walkNeighbours() walks over all 8 neighbours and runs worker() for each,
-func (f Field) walkNeighbours(x, y int, worker func(*cell)) {
+func (f Field) walkNeighbours(x, y int, worker func(*Cell)) {
 	// determine real boundaries of the neighbourhood considering field borders
 	xStart := int(math.Max(float64(x-1), 0))
 	xEnd := int(math.Min(float64(x+1), float64(f.width-1)))
@@ -68,7 +55,7 @@ func (f Field) walkNeighbours(x, y int, worker func(*cell)) {
 		for dx := xStart; dx <= int(xEnd); x++ {
 			// omit current cell
 			if dx != x || dy != y {
-				worker(f.getCell(dx, dy))
+				worker(f.GetCell(dx, dy))
 			}
 		}
 	}
@@ -77,21 +64,21 @@ func (f Field) walkNeighbours(x, y int, worker func(*cell)) {
 func (f Field) IsFillable(x, y int) bool {
 	// if cell has been open - it should not take part in free-area roll down,
 	// as wel las if it is a Hole - holes are handled in the fill() immediatelly
-	pc := f.getCell(x, y)
-	if pc.State == CellStateOpen || pc.Holes == HoleMarker {
+	pc := f.GetCell(x, y)
+	if pc.State == CellStateOpen || pc.HolesNumber == ThisIsHoleMarker {
 		return false
 	}
 
 	// if this is clear free cell - it is just ok
-	if pc.Holes == 0 {
+	if pc.HolesNumber == 0 {
 		return true
 	}
 
 	// but if it is a hole-adjacent cell with a counter - whe should make sure it is adjacent also to a clear free cell
 	// this way we will expand only to the borders (with counters) of the free area, no more
 	freeNeighborsNumber := 0
-	f.walkNeighbours(x, y, func(c *cell) {
-		if c.Holes == 0 {
+	f.walkNeighbours(x, y, func(c *Cell) {
+		if c.HolesNumber == 0 {
 			freeNeighborsNumber++
 		}
 	})
@@ -101,7 +88,7 @@ func (f Field) IsFillable(x, y int) bool {
 
 // Fill() will be called only if IsFillable() satisfied - so we don't need to do additional checks
 func (f Field) Fill(x, y int) {
-	pc := f.getCell(x, y)
+	pc := f.GetCell(x, y)
 	pc.State = CellStateOpen
 	f.openCells++
 	// if all cells are open exept holes, the nwe won 
@@ -116,14 +103,14 @@ func NewField(height, width, holesNumber int) *Field {
 	pfield.State = GameStateInProgress
 	pfield.openCells = 0
 
-	cells := make([]cell, height*width)
+	cells := make([]Cell, height*width)
 
 	for i := 0; i < holesNumber; i++ {
-		cells[i] = cell{State: CellStateClosed, Holes: HoleMarker}
+		cells[i] = Cell{State: CellStateClosed, HolesNumber: ThisIsHoleMarker}
 	}
 
 	for i := holesNumber; i < len(cells); i++ {
-		cells[i] = cell{State: CellStateClosed, Holes: 0}
+		cells[i] = Cell{State: CellStateClosed, HolesNumber: 0}
 	}
 
 	// Now, make holes to be normally distributed over the field
@@ -133,22 +120,22 @@ func NewField(height, width, holesNumber int) *Field {
 
 	pfield.cells = cells
 	// Holes contains pointers to actual cells
-	pfield.holesRefs = make([]*cell, holesNumber)
+	pfield.holesRefs = make([]*Cell, holesNumber)
 
 	// Now, find all coordinates for shuffled holes and fill hole-adjacent cells with counters
 	// And add each hole coordinates to the f.Holes array for direct tracking
 	holeIndex := 0
 	for y := 0; y < pfield.height; y++ {
 		for x := 0; x < pfield.width; x++ {
-			pc := pfield.getCell(x, y)
-			if pc.Holes == HoleMarker {
+			pc := pfield.GetCell(x, y)
+			if pc.HolesNumber == ThisIsHoleMarker {
 				pfield.holesRefs[holeIndex] = pc
 				holeIndex++
 			}
-			pfield.walkNeighbours(x, y, func(pcc *cell) {
+			pfield.walkNeighbours(x, y, func(pcc *Cell) {
 				// if this is not a hole - increase it hole-adjacent counter
-				if pcc.Holes != HoleMarker {
-					pcc.Holes++
+				if pcc.HolesNumber != ThisIsHoleMarker {
+					pcc.HolesNumber++
 				}
 			})
 		}
@@ -161,14 +148,14 @@ func NewField(height, width, holesNumber int) *Field {
 // If the cell has no adjacent holes (clear-free cell), then all free region is opened
 func (f Field) OpenCell(x, y int) GameState {
 
-	pc := f.getCell(x, y)
+	pc := f.GetCell(x, y)
 
 	if pc.State == CellStateOpen {
 		// cell is already opened
 		return 0
 	}
 
-	if pc.Holes == HoleMarker {
+	if pc.HolesNumber == ThisIsHoleMarker {
 		// now, we have to reveal all holes:
 		for _, ph := range f.holesRefs {
 			ph.State = CellStateOpen
@@ -180,7 +167,7 @@ func (f Field) OpenCell(x, y int) GameState {
 		return f.State
 	}
 
-	if pc.Holes > 0 {
+	if pc.HolesNumber > 0 {
 		// this is a hole-adjacent cell, we should open just it
 		pc.State = CellStateOpen
 		f.openCells++

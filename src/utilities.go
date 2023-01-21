@@ -72,7 +72,7 @@ const (
 	FillEventNothingToFill
 )
 
-// IField interface is an abstruction of the game field, owns states of cells
+// IFloodableField interface is an abstruction of the game field, owns states of cells
 // This abstraction allows to flood-fill game fields with different logic over cells
 // (logic in our case: 
 //	  we need to flood-fill all clear-free cells + cells with countrs on the closure border of the free region)
@@ -80,7 +80,7 @@ const (
 // - Fill()  - knows how to fill the cell with a new state
 // - GetWidth() int - abstract width
 // - GetHeight() int - abstract height
-type IField interface {
+type IFloodableField interface {
 	IsFillable(x, y int) bool
 	Fill(x, y int)
 	GetWidth() int
@@ -90,7 +90,7 @@ type IField interface {
 // Here is an algorithm rewritten in Go from here: https://lodev.org/cgtutor/floodfill.html
 // - x, y int - coordinates of the seed to start from
 // - field - abstract cell field
-func FloodFill(x, y int, field IField) FillEvent {
+func FloodFill(x, y int, field IFloodableField) FillEvent {
 	if !field.IsFillable(x, y) {
 		return FillEventNothingToFill
 	}
