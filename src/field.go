@@ -161,22 +161,25 @@ func NewField(height, width, holesNumber int) (*Field, error) {
 	// Holes contains pointers to actual cells
 	pfield.holesRefs = make([]*Cell, holesNumber)
 
-	// Now, find all coordinates for shuffled holes and fill hole-adjacent cells with counters
-	// And add each hole coordinates to the f.Holes array for direct tracking
+	// Now, find all coordinates for shuffled holes and 
 	holeIndex := 0
 	for y := 0; y < pfield.height; y++ {
 		for x := 0; x < pfield.width; x++ {
 			pc := pfield.GetCell(x, y)
+			// if this is a hole
 			if pc.HolesNumber == ThisIsHoleMarker {
+				// And hole's cell to the f.holesRefs array for direct tracking
 				pfield.holesRefs[holeIndex] = pc
 				holeIndex++
+
+				// increment hole-adjacent cells' counters
+				pfield.walkNeighbours(x, y, func(pcc *Cell) {
+					// if this is not a hole - increase it hole-adjacent counter
+					if pcc.HolesNumber != ThisIsHoleMarker {
+						pcc.HolesNumber++
+					}
+				})
 			}
-			pfield.walkNeighbours(x, y, func(pcc *Cell) {
-				// if this is not a hole - increase it hole-adjacent counter
-				if pcc.HolesNumber != ThisIsHoleMarker {
-					pcc.HolesNumber++
-				}
-			})
 		}
 	}
 
