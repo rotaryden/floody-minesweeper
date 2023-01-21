@@ -14,8 +14,11 @@ func main(){
 			fmt.Printf("Error: %s", err)
 			os.Exit(1)
 		}
-		for point := GameTurnUI(f); f.OpenCell(point) == GameStateInProgress; point = GameTurnUI(f) {
-			
+		for point := GameTurnUI(f); f.OpenCell(point) == GameStateInProgress; point = GameTurnUI(f) {}
+
+		if !GameEndedUI(f){
+			fmt.Println("Bye!")
+			break
 		}
 	}
 }

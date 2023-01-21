@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyz"
@@ -56,21 +57,22 @@ func getPrintableGameStatus(f IField) string {
 }
 
 func printHeader() {
-	fmt.Println("==================================")
+	fmt.Println("\n\n\n==================================")
 	fmt.Println("============= Proxx ==============")
 	fmt.Println("==================================")
 }
 
-func printFooter(f IField) {
+func printTurnFooter(f IField) {
 	fmt.Println("----------------------------------")
 	fmt.Printf("Status: %s\n", getPrintableGameStatus(f))
-	fmt.Println("----------------------------------\n\n")
+	fmt.Println("----------------------------------")
 }
 
-func getValidAnswer[T any](reader *bufio.Reader, question string, predicate func(string) (bool, T)) T {
+func getValidAnswer[T any](question string, predicate func(string) (bool, T)) T {
+	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Println("")
-		fmt.Print(question)
+		fmt.Printf(">>> %s", question)
 		a, _, _ := reader.ReadLine()
 		if isValid, res := predicate(string(a)); isValid {
 			return res
@@ -82,11 +84,9 @@ func getValidAnswer[T any](reader *bufio.Reader, question string, predicate func
 func GameTurnUI(f IField) Point {
 	printHeader()
 	printField(f)
-	printFooter(f)
-	r := bufio.NewReader(os.Stdin)
+	printTurnFooter(f)
 
 	return getValidAnswer(
-		r,
 		"What cell to open? (input e.g. b2, e6, j18): ",
 		func(ans string) (bool, Point) {
 			p := Point{}
@@ -105,14 +105,26 @@ func GameTurnUI(f IField) Point {
 
 }
 
+func GameEndedUI(f IField) bool {
+	printHeader()
+	printField(f)
+	printTurnFooter(f)
+
+	return getValidAnswer(
+		"Begin New Game? (y/n) : ",
+		func(ans string) (bool, bool) {
+			return true, strings.ToLower(ans) == "y"
+		},
+	)
+
+}
+
 func NewGameUI() GameSettings {
 	gs := GameSettings{}
 	printHeader()
 	fmt.Println("*** Create New Game ****")
-	r := bufio.NewReader(os.Stdin)
 
 	gs.Height = getValidAnswer(
-		r,
 		fmt.Sprintf("Game field Height (%d < height < %d): ", GameSettingsMinHeight, GameSettingsMaxHeight),
 		func(ans string) (bool, int) {
 			res, e := strconv.Atoi(ans)
@@ -121,7 +133,6 @@ func NewGameUI() GameSettings {
 	)
 
 	gs.Width = getValidAnswer(
-		r,
 		fmt.Sprintf("Game field Width (%d < width < %d): ", GameSettingsMinWidth, GameSettingsMaxWidth),
 		func(ans string) (bool, int) {
 			res, e := strconv.Atoi(ans)
@@ -130,7 +141,6 @@ func NewGameUI() GameSettings {
 	)
 
 	gs.HolesNumber = getValidAnswer(
-		r,
 		fmt.Sprintf("Number of holes (0 < width < %d): ", gs.Height * gs.Width),
 		func(ans string) (bool, int) {
 			res, e := strconv.Atoi(ans)
