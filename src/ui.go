@@ -5,38 +5,41 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyz"
 const lettersBase = int('a')
 
-func getPrintableField(f IField) []string {
+func printField(f IField) {
 	h := f.GetHeight()
 	w := f.GetWidth()
-	result := make([]string, h+1)
+
+	//offset
+	fmt.Printf("  ")
 	// letter denotion of columns
-	result[0] = letters[0:w]
+	for _, c := range letters[0:w] {
+		fmt.Printf("%2c", c)
+	}
+	fmt.Println()
 	for y := 0; y < h; y++ {
-		var sb strings.Builder
 		// print line number
-		sb.WriteString(fmt.Sprintf("%2d ", y))
+		fmt.Printf("%2d ", y)
 		for x := 0; x < w; x++ {
 			pc := f.GetCell(x, y)
 			switch {
 			case pc.State == CellStateClosed:
-				sb.WriteRune('🙫')
+				// add space after placeholder "%s " to fix wide rune printing issue
+				fmt.Printf("%c ", '🙫')
 			case pc.HolesNumber == ThisIsHoleMarker:
-				sb.WriteRune('⦿')
+				fmt.Printf("%c ", '⦿')
 			case pc.HolesNumber == 0:
-				sb.WriteRune('⛶')
+				fmt.Printf("%c ", '⛶')
 			default:
-				sb.WriteRune(rune(pc.HolesNumber))
+				fmt.Printf("%2d", pc.HolesNumber)
 			}
 		}
-		result[y+1] = sb.String()
+		fmt.Println()
 	}
-	return result
 }
 
 func getPrintableGameStatus(f IField) string {
@@ -78,27 +81,24 @@ func getValidAnswer[T any](reader *bufio.Reader, question string, predicate func
 
 func GameTurnUI(f IField) Point {
 	printHeader()
-	lines := getPrintableField(f)
-	for l := range lines {
-		fmt.Println(l)
-	}
+	printField(f)
 	printFooter(f)
 	r := bufio.NewReader(os.Stdin)
 
 	return getValidAnswer(
 		r,
-		"Enter cell to open in form of dd-l, where d-> 0...9 and l-> 'a'...'z': ",
+		"What cell to open? (input e.g. b2, e6, j18): ",
 		func(ans string) (bool, Point) {
-			parts := strings.Split(ans, "-")
 			p := Point{}
-			if len(parts[1]) > 1 {
+			if len(ans) < 2 {
 				return false, p
 			}
+			letter := ans[0]
 			// convert character code into an X coordinate 
-			p.X = int(byte(parts[1][0]) - byte(lettersBase))
+			p.X = int(byte(letter) - byte(lettersBase))
 			var e error
-			// convert first part - number strin into Y coordinate
-			p.Y, e = strconv.Atoi(parts[0])
+			// convert second part - number strin into Y coordinate
+			p.Y, e = strconv.Atoi(ans[1:])
 			return e == nil && p.X < GameSettingsMaxWidth, p
 		},
 	)

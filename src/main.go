@@ -6,6 +6,7 @@ import (
 )
 
 func main(){
+	fmt.Printf("PID: %d\n\n", os.Getpid())
 	for {
 		settings := NewGameUI()
 		f, err := NewField(settings.Height, settings.Width, settings.HolesNumber)

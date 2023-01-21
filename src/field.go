@@ -45,7 +45,7 @@ func (f Field) walkNeighbours(x, y int, worker func(*Cell)) {
 	yEnd := int(math.Min(float64(y+1), float64(f.height-1)))
 
 	for dy := yStart; dy <= int(yEnd); dy++ {
-		for dx := xStart; dx <= int(xEnd); x++ {
+		for dx := xStart; dx <= int(xEnd); dx++ {
 			// omit current cell
 			if dx != x || dy != y {
 				worker(f.GetCell(dx, dy))
