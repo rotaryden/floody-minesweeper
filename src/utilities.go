@@ -69,7 +69,9 @@ const (
 	FillEventNothingToFill
 )
 
-// Here is an algorithm rewritten in Go from here: https://lodev.org/cgtutor/floodfill.html
+// Here is a non-recursive stack-based scan line algorithm 
+// rewritten in Go from here: https://lodev.org/cgtutor/floodfill.html
+// it has been chosen because of speed, program stack safety and relative simplicity
 // - x, y int - coordinates of the seed to start from
 // - field - abstract cell field
 func FloodFill(x, y int, field IFloodableField) FillEvent {
@@ -87,6 +89,7 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 
 	for point, ok := stack.Pop(); ok; point, ok = stack.Pop() {
 		x1 := point.X
+		y := point.Y
 		for x1 >= 0 && field.IsFillable(x1, y) {
 			x1--
 		}
