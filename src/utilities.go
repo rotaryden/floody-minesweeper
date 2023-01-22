@@ -94,32 +94,32 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 	stack.Push(Point{x, y})
 
 	for point, ok := stack.Pop(); ok; point, ok = stack.Pop() {
-		x1 := point.X
+		dx := point.X
 		y := point.Y
-		for x1 >= 0 && field.IsFillable(x1, y) {
-			x1--
+		for dx >= 0 && field.IsFillable(dx, y) {
+			dx--
 		}
-		x1++
+		dx++
 		spanAbove := false
 		spanBelow := false
 
-		for x1 < width && field.IsFillable(x1, y) {
-			field.Fill(x1, y)
+		for dx < width && field.IsFillable(dx, y) {
+			field.Fill(dx, y)
 
-			if !spanAbove && y > 0 && field.IsFillable(x1, (y-1)) {
-				stack.Push(Point{x1, y - 1})
+			if !spanAbove && y > 0 && field.IsFillable(dx, (y-1)) {
+				stack.Push(Point{dx, y - 1})
 				spanAbove = true
-			} else if spanAbove && y > 0 && !field.IsFillable(x1, (y-1)) {
+			} else if spanAbove && y > 0 && !field.IsFillable(dx, (y-1)) {
 				spanAbove = false
 			}
 
-			if !spanBelow && y < height-1 && field.IsFillable(x1, (y+1)) {
-				stack.Push(Point{x1, y + 1})
+			if !spanBelow && y < height-1 && field.IsFillable(dx, (y+1)) {
+				stack.Push(Point{dx, y + 1})
 				spanBelow = true
-			} else if spanBelow && y < height-1 && !field.IsFillable(x1, (y+1)) {
+			} else if spanBelow && y < height-1 && !field.IsFillable(dx, (y+1)) {
 				spanBelow = false
 			}
-			x1++
+			dx++
 		}
 	}
 	return FillEventFinished
