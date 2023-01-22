@@ -26,6 +26,17 @@ func getValidAnswer[T any](question string, predicate func(string) (bool, T)) T 
 	}
 }
 
+func ynQuestion(text string) bool {
+	return getValidAnswer(
+		fmt.Sprintf("%s? (y/n) : ", text),
+		func(ans string) (bool, bool) {
+			l := strings.ToLower(ans)
+			return l == "y" || l == "n", l == "y"
+		},
+	)
+
+}
+
 type UI struct {
 	gameSettings *GameSettings
 	f            IField
@@ -141,13 +152,7 @@ func (ui *UI) GameEnded() bool {
 	ui.printField()
 	ui.printTurnFooter()
 
-	return getValidAnswer(
-		"Begin New Game? (y/n) : ",
-		func(ans string) (bool, bool) {
-			return true, strings.ToLower(ans) == "y"
-		},
-	)
-
+	return ynQuestion("Begin New Game")
 }
 
 func NewUI() *UI {
@@ -156,12 +161,7 @@ func NewUI() *UI {
 	ui.printHeader()
 	fmt.Println("*** Create New Game ****")
 
-	ui.isUnicode = getValidAnswer(
-		"Play Unicode version (best on Ubuntu terminal)? (y/n) : ",
-		func(ans string) (bool, bool) {
-			return true, strings.ToLower(ans) == "y"
-		},
-	)
+	ui.isUnicode = ynQuestion("Play Unicode version (best on Ubuntu terminal)")
 
 	gs.Height = getValidAnswer(
 		fmt.Sprintf("Game field Height (%d < height < %d): ", GameSettingsMinHeight, GameSettingsMaxHeight),

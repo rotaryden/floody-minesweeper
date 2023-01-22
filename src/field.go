@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math"
 	"math/rand"
+	"time"
 )
 
 type Field struct {
@@ -190,6 +191,8 @@ func NewField(gs *GameSettings) (*Field, error) {
 		cells[i] = Cell{State: CellStateClosed, HolesNumber: 0}
 	}
 
+	// seed random generator
+	rand.Seed(time.Now().UnixNano())
 	// Now, make holes to be normally distributed over the field
 	rand.Shuffle(len(cells), func(i, j int) {
 		cells[i], cells[j] = cells[j], cells[i]
