@@ -15,7 +15,8 @@ type Field struct {
 	cells  []*Cell
 	width  int
 	height int
-	// additional list of pointers pairs to the all holes
+	// additional list of pointers to the all hole cells 
+	// - needed for quick reveal of all holes on game over
 	holesRefs []*Cell
 	// simple game state
 	openCells int
