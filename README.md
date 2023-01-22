@@ -22,14 +22,16 @@ on OSX (not tested)
 
 ## Gameplay
 
-Game runs in the terminal, UI is textual using unicode sumbols,
-best to have a fixed font on your terminal
+Game runs in the terminal, UI is textual.
 
-Just run for Linux:
-```
-    ./build/proxx
-```
-or another executable for you platform
+Game asks questions about settings and then about turns.
+
+The first question - whether you want to play Unicode variant -
+this is good looking on Ubuntu terminal at least.
+(screenshots made from Ubunut terminal with Unicode version)
+For Windows - it is better to play ASCII.
+
+Anyway, best to have a fixed font in your terminal
 
 
 ## Build: Linux

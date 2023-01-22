@@ -167,19 +167,20 @@ func (f *Field) OpenCell(p Point) GameState {
 }
 
 // NewField constructs a new game field
-func NewField(height, width, holesNumber int) (*Field, error) {
+func NewField(gs *GameSettings) (*Field, error) {
 	pfield := new(Field)
-	pfield.width = width
-	pfield.height = height
+	pfield.width = gs.Width
+	pfield.height = gs.Height
+	holesNumber := gs.HolesNumber
 
-	if holesNumber > height*width {
+	if holesNumber > gs.Height*gs.Width {
 		return nil, errors.New("holesNumber > height * width")
 	}
 
 	pfield.State = GameStateInProgress
 	pfield.openCells = 0
 
-	cells := make([]Cell, height*width)
+	cells := make([]Cell, gs.Height*gs.Width)
 
 	for i := 0; i < holesNumber; i++ {
 		cells[i] = Cell{State: CellStateClosed, HolesNumber: ThisIsHoleMarker}
