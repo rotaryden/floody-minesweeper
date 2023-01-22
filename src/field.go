@@ -17,7 +17,7 @@ type Field struct {
 	holesRefs []*Cell
 	// simple game state
 	openCells int
-	State GameState
+	State     GameState
 }
 
 func (f *Field) GetWidth() int {
@@ -57,7 +57,9 @@ func (f *Field) walkNeighbours(x, y int, worker func(*Cell) bool) {
 	}
 }
 
-func (f *Field) IsFillable(x, y int) bool {
+// This is a central classifying predicate in the flood-fill algorithm
+// it is responsible for classify connected free cells area with adjacent border of counter cells (hole-adjacent cells)
+func (f *Field) IsFillable(x, y int, isFirstCell bool) bool {
 	// if cell has been open - it should not take part in free-area roll down,
 	// as wel las if it is a Hole - holes are handled in the fill() immediatelly
 	pc := f.GetCell(x, y)
@@ -65,24 +67,36 @@ func (f *Field) IsFillable(x, y int) bool {
 		return false
 	}
 
-	// if this is clear free cell - it is just ok
-	if pc.HolesNumber == 0 {
+	// if this is THE FIRST clear free cell in the free region being opened - open it.
+	//Explanation of the isFirstCell functionality: it should be fillable ONLY if all clear free neighbours are closed, to avoid a bug like this:
+	//    a b c d e f g h i j
+	//  0 ⛶ 1 🙫 1 ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ 
+	//  1 ⛶ 1 1 1 ⛶ ⛶ ⛶ ⛶ 1 1 
+	//  2 ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ 1 🙫   <<----- original free region - has been opened e.g. by "e2"
+	//  3 ⛶ ⛶ ⛶ ⛶ ⛶ 1 1 1 1 1 
+	//  4 ⛶ ⛶ ⛶ ⛶ ⛶ 1 🙫 1 ⛶ ⛶  <<--- this 2nd region has been opened despite it is not connected to the original free region - Bug!
+	//  5 ⛶ 1 1 1 ⛶ 1 1 2 1 1 
+	//  6 ⛶ 1 🙫 1 ⛶ ⛶ ⛶ 1 🙫 🙫 
+	//  7 ⛶ 1 1 1 ⛶ ⛶ ⛶ 1 1 1 
+	//  8 ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ 
+	//  9 ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ 
+	if pc.HolesNumber == 0 && isFirstCell {
 		return true
 	}
 
 	// but if it is a hole-adjacent cell with a counter - whe should make sure it is adjacent also to a clear-free (non-adjacent) cell
 	// moreover, this cell should be open to mitigate situations like this (h3 is ahjacent to 2 independent free regions):
 	// 	   a b c d e f g h i j
-	//  0 🙫 2 🙫 1 ⛶ ⛶ ⛶ 1 🙫 🙫 
-	//  1 🙫 3 1 1 ⛶ ⛶ ⛶ 1 🙫 🙫 
-	//  2 🙫 1 ⛶ ⛶ ⛶ ⛶ ⛶ 1 🙫 🙫 
-	//  3 🙫 2 1 1 1 1 1 1 1 1          <<<-----
-	//  4 🙫 🙫 🙫 🙫 🙫 🙫 🙫 1 ⛶ ⛶ 
-	//  5 🙫 🙫 🙫 🙫 🙫 2 🙫 3 2 1 
-	//  6 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 
-	//  7 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 
-	//  8 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 
-	//  9 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 
+	//  0 🙫 2 🙫 1 ⛶ ⛶ ⛶ 1 🙫 🙫
+	//  1 🙫 3 1 1 ⛶ ⛶ ⛶ 1 🙫 🙫
+	//  2 🙫 1 ⛶ ⛶ ⛶ ⛶ ⛶ 1 🙫 🙫
+	//  3 🙫 2 1 1 1 1 1 1 1 1          
+	//  4 🙫 🙫 🙫 🙫 🙫 🙫 🙫 1 ⛶ ⛶  <<<----- 2nd disconnected region has opened - Bug!
+	//  5 🙫 🙫 🙫 🙫 🙫 2 🙫 3 2 1
+	//  6 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫
+	//  7 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫
+	//  8 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫
+	//  9 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫 🙫
 
 	// this way we will expand only to the borders (with counters) of the free area, no more
 	hasFreeOpenNeighbour := false
@@ -102,11 +116,11 @@ func (f *Field) Fill(x, y int) {
 	pc := f.GetCell(x, y)
 	pc.State = CellStateOpen
 	f.openCells++
-	// if all cells are open exept holes, the nwe won 
+	// if all cells are open exept holes, the nwe won
 	// - this will be processed at a higher level in OpenCell()
 }
 
-func (f *Field) revealHoles() {	
+func (f *Field) revealHoles() {
 	for _, h := range f.holesRefs {
 		h.State = CellStateOpen
 	}
@@ -114,7 +128,7 @@ func (f *Field) revealHoles() {
 
 // OpenCell opens a cell on the field and changes game state if it is a Hole.
 // If the cell has no adjacent holes (clear-free cell), then all free region is opened
-func (f *Field) OpenCell(p Point) GameState {	
+func (f *Field) OpenCell(p Point) GameState {
 	pc := f.GetCell(p.X, p.Y)
 
 	if pc.State == CellStateOpen {
@@ -137,16 +151,16 @@ func (f *Field) OpenCell(p Point) GameState {
 		f.openCells++
 
 	} else /*if f.Holes == 0*/ {
-		// f.Holes == 0 - this is a clear-free (non-adjacent) cell, 
+		// f.Holes == 0 - this is a clear-free (non-adjacent) cell,
 		// we should flood-fill adjacent free cells and its border with open action
-		FloodFill(p.X, p.Y, f)	
+		FloodFill(p.X, p.Y, f)
 	}
 
-	if f.openCells >= len(f.cells) - len(f.holesRefs) {
+	if f.openCells >= len(f.cells)-len(f.holesRefs) {
 		// all have been open except holes - we Won!!!
 		f.State = GameStateWin
 		// yet still good to show all holes
-		f.revealHoles()  
+		f.revealHoles()
 	}
 
 	return f.State
@@ -158,7 +172,7 @@ func NewField(height, width, holesNumber int) (*Field, error) {
 	pfield.width = width
 	pfield.height = height
 
-	if holesNumber > height * width {
+	if holesNumber > height*width {
 		return nil, errors.New("holesNumber > height * width")
 	}
 
@@ -184,7 +198,7 @@ func NewField(height, width, holesNumber int) (*Field, error) {
 	// Holes contains pointers to actual cells
 	pfield.holesRefs = make([]*Cell, holesNumber)
 
-	// Now, find all coordinates for shuffled holes and 
+	// Now, find all coordinates for shuffled holes and
 	holeIndex := 0
 	for y := 0; y < pfield.height; y++ {
 		for x := 0; x < pfield.width; x++ {
@@ -209,5 +223,3 @@ func NewField(height, width, holesNumber int) (*Field, error) {
 
 	return pfield, nil
 }
-
-

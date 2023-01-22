@@ -81,7 +81,9 @@ const (
 // - x, y int - coordinates of the seed to start from
 // - field - abstract cell field
 func FloodFill(x, y int, field IFloodableField) FillEvent {
-	if !field.IsFillable(x, y) {
+	isFirstCell := true
+
+	if !field.IsFillable(x, y, isFirstCell) {
 		return FillEventNothingToFill
 	}
 
@@ -97,7 +99,7 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 		dx := point.X
 		lineY := point.Y
 
-		for dx >= 0 && field.IsFillable(dx, lineY) {
+		for dx >= 0 && field.IsFillable(dx, lineY, isFirstCell) {
 			dx--
 		}
 		dx++
@@ -105,23 +107,24 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 		spanAbove := false
 		spanBelow := false
 
-		for dx < width && field.IsFillable(dx, lineY) {
+		for dx < width && field.IsFillable(dx, lineY, isFirstCell) {
 			field.Fill(dx, lineY)
+			isFirstCell = false
 
-			if !spanAbove && lineY > 0 && field.IsFillable(dx, (lineY-1)) {
+			if !spanAbove && lineY > 0 && field.IsFillable(dx, (lineY-1), isFirstCell) {
 				stack.Push(Point{dx, lineY - 1})
 				spanAbove = true
-			} else if spanAbove && lineY > 0 && !field.IsFillable(dx, (lineY-1)) {
+			} else if spanAbove && lineY > 0 && !field.IsFillable(dx, (lineY-1), isFirstCell) {
 				// reject to span above into the above adjacent cell close to the previous adjacent cell, 
 				// where we''ve already spawn
 				// but will step into the next above cell on the right, if needed
 				spanAbove = false
 			}
 
-			if !spanBelow && lineY < height-1 && field.IsFillable(dx, (lineY+1)) {
+			if !spanBelow && lineY < height-1 && field.IsFillable(dx, (lineY+1), isFirstCell) {
 				stack.Push(Point{dx, lineY + 1})
 				spanBelow = true
-			} else if spanBelow && lineY < height-1 && !field.IsFillable(dx, (lineY+1)) {
+			} else if spanBelow && lineY < height-1 && !field.IsFillable(dx, (lineY+1), isFirstCell) {
 				spanBelow = false
 			}
 			dx++
