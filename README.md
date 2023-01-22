@@ -2,7 +2,7 @@
 Proxx Test project
 
 ## Run 
-Compiled executables should be present in the ./build folder
+Compiled executables may be run like this
 
 on Linux (tested on Ubuntu 22.04):
 ```
@@ -18,7 +18,6 @@ on OSX (not tested)
 ```
     ./build/proxx_osx
 ```
-
 
 ## Gameplay
 
@@ -38,17 +37,16 @@ screenshots/gameplay*.png - some gameplay samples.
 ## Build: Linux
 Prerequisite: golang 1.19 should be installed
 
-On Linux, to build for all platforms, run
+On Linux, to build for ALL platforms, run
 
 ```
-    ./build.sh
+    ./build.sh all
 ```
 
 executables will be in the ./build folder
 
 ## Build: on other platforms
-
-do
+from the project root, do
 ```
     go build -o build/<name_your_executable> ./src
 ```
