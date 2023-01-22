@@ -70,8 +70,9 @@ https://en.wikipedia.org/wiki/Flood_fill
 https://lodev.org/cgtutor/floodfill.html
 
 
-## Bonus: bug screens
-screenshots/fixed_bug*.png - some flood-fill/IsFillable() bugs I had to mitigate during development 
+## Bug history screenshots
+screenshots/fixed_bug*.png - some flood-fill/IsFillable() and index arithmetic bugs 
+I had to mitigate during development 
 
 ## Copyright
 

@@ -156,7 +156,7 @@ func (ui *UI) GameEnded() bool {
 }
 
 func NewUI() *UI {
-	ui := new(UI)
+	ui := &UI{}
 	gs := &GameSettings{}
 	ui.printHeader()
 	fmt.Println("*** Create New Game ****")

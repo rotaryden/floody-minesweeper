@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -29,8 +30,12 @@ func (f *Field) GetHeight() int {
 	return f.height
 }
 
+// reaches the cell using index arithmetic
 func (f *Field) GetCell(x, y int) *Cell {
-	return f.cells[y*f.height+x]
+	if x < 0 || x >= f.width || y < 0 || y >= f.height {
+		panic(fmt.Sprintf("x=%d, y=%d out of boundaries!", x, y))
+	}
+	return f.cells[y * f.width +x ]
 }
 
 func (f *Field) GetState() GameState {
