@@ -1,7 +1,8 @@
 # Proxx Test
+Proxx Test project
 
 ## Run 
-(Compiled executables bundled)
+Compiled executables should be present in the archive ./build folder
 
 on Linux (tested on Ubuntu 22.04):
 ```
@@ -32,7 +33,7 @@ or another executable for you platform
 
 
 ## Build: Linux
-Prerequisite: golang 1.19 installed
+Prerequisite: golang 1.19 should be installed
 
 On Linux, to build for all platforms, run
 
@@ -52,11 +53,15 @@ do
 ## Algorithms
 
 The free space revealing algorithm appeared a bit challenging from the logic point,
-as decision was to try to adapt efficient non-recursive flood-fill algorithm for  
+as decision was to try to adapt an efficient non-recursive flood-fill algorithm for  
 opening free areas with border of hole-adjacent cells (with counters),
 
 so the main challenge was to provide the IsFillable() predicate classifying
 free cells and bordering counter cells to the same "color" class (in terms of flood-fill)
+
+For this purpose, isFirstCell parameter was added, to distinguish whether this is a first free cell
+trying to be opened, as this appeared to be critical for rejecting non-connected regions
+(see additional comments in the code) 
 
 ## References used
 https://en.wikipedia.org/wiki/Flood_fill

@@ -84,7 +84,7 @@ func (f *Field) IsFillable(x, y int, isFirstCell bool) bool {
 		return true
 	}
 
-	// but if it is a hole-adjacent cell with a counter - whe should make sure it is adjacent also to a clear-free (non-adjacent) cell
+	// if it is a hole-adjacent cell with a counter - whe should make sure it is adjacent also to a clear-free (non-adjacent) cell
 	// moreover, this cell should be open to mitigate situations like this (h3 is ahjacent to 2 independent free regions):
 	// 	   a b c d e f g h i j
 	//  0 🙫 2 🙫 1 ⛶ ⛶ ⛶ 1 🙫 🙫
