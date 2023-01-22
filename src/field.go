@@ -9,9 +9,9 @@ import (
 )
 
 type Field struct {
-	// as we have fixed wodth and height on the start,
-	// cells can be kept in the plain array, index arithmetic asumed: y*width+x,
-	// also this form is more efficient shuffling elements etc.
+	// as we have fixed width and height on the start,
+	// cells can be kept in the plain array, index arithmetic asumed: y * width + x,
+	// also this form is more efficient for shuffling elements etc.
 	cells  []*Cell
 	width  int
 	height int
@@ -44,7 +44,7 @@ func (f *Field) GetState() GameState {
 }
 
 // walkNeighbours() walks over all 8 neighbours and runs worker() for each,
-// unnless worker() returns true before
+// unnless worker() returns true before to stop earlier
 func (f *Field) walkNeighbours(x, y int, worker func(*Cell) bool) {
 	// determine real boundaries of the neighbourhood considering field borders
 	xStart := int(math.Max(float64(x-1), 0))
