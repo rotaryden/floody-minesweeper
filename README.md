@@ -29,7 +29,7 @@ Game asks questions about settings and then about turns.
 The first question - whether you want to play Unicode variant -
 this is good looking on Ubuntu terminal at least.
 (screenshots made from Ubunut terminal with Unicode version)
-For Windows - it is better to play ASCII.
+For Windows - there were issues with Unicode symbols, it is better to play ASCII.
 
 Anyway, best to have a fixed font in your terminal
 
