@@ -33,6 +33,7 @@ For Windows - there were issues with Unicode symbols, it is better to play ASCII
 
 Anyway, best to have a fixed font in your terminal
 
+screenshots/gameplay*.png - some gameplay samples.
 
 ## Build: Linux
 Prerequisite: golang 1.19 should be installed
