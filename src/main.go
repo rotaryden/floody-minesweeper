@@ -6,9 +6,12 @@ import (
 )
 
 func main(){
+	// for debugging
 	fmt.Printf("PID: %d\n\n", os.Getpid())
+	
 	for {
 		ui := NewUI()
+		// create game field, it is decoupled from UI via IField interface
 		f, err := NewField(ui.GetSettings())
 		ui.SetField(f)
 		if err != nil {

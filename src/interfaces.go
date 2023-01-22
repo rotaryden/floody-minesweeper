@@ -1,5 +1,6 @@
 package main
 
+// Game state
 type GameState int
 
 const (
@@ -8,7 +9,7 @@ const (
 	GameStateWin
 )
 
-// common part of interfaces (interface mixin)
+// common part of interfaces (mixin)
 type IMeasurable interface {
 	// abstract width
 	GetWidth() int

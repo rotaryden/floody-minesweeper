@@ -57,7 +57,8 @@ func NewStack[T any]() *Stack[T] {
 	return &Stack[T]{
 		head: nil,
 		Size: 0,
-		lock: sync.Mutex{},
+		// mutex is needed for potential concurrent usage
+		lock: sync.Mutex{}, 
 	}
 }
 
@@ -99,6 +100,7 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 		dx := point.X
 		lineY := point.Y
 
+		// move to the very left cell of the current connected region on the row
 		for dx >= 0 && field.IsFillable(dx, lineY, isFirstCell) {
 			dx--
 		}
@@ -111,6 +113,7 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 			field.Fill(dx, lineY)
 			isFirstCell = false
 
+			// check adjucent cells from the row above and push to stack
 			if !spanAbove && lineY > 0 && field.IsFillable(dx, (lineY-1), isFirstCell) {
 				stack.Push(Point{dx, lineY - 1})
 				spanAbove = true
@@ -121,12 +124,15 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 				spanAbove = false
 			}
 
+			// check adjucent cells from the row below and push to stack
 			if !spanBelow && lineY < height-1 && field.IsFillable(dx, (lineY+1), isFirstCell) {
 				stack.Push(Point{dx, lineY + 1})
 				spanBelow = true
 			} else if spanBelow && lineY < height-1 && !field.IsFillable(dx, (lineY+1), isFirstCell) {
 				spanBelow = false
 			}
+
+			// move on the current line
 			dx++
 		}
 	}

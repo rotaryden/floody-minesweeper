@@ -1,5 +1,6 @@
 package main
 
+// denotes the given cel is a hole
 const ThisIsHoleMarker = 1000
 
 type CellState int
