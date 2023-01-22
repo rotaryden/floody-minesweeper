@@ -3,8 +3,8 @@ package main
 const (
 	GameSettingsMaxHeight = 26
 	GameSettingsMaxWidth = 26
-	GameSettingsMinHeight = 5
-	GameSettingsMinWidth = 5
+	GameSettingsMinHeight = 3
+	GameSettingsMinWidth = 3
 )
 
 type GameSettings struct {

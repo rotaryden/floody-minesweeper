@@ -11,7 +11,7 @@ type Field struct {
 	// as we have fixed wodth and height on the start,
 	// cells can be kept in the plain array, index arithmetic asumed: y*width+x,
 	// also this form is more efficient shuffling elements etc.
-	cells  []Cell
+	cells  []*Cell
 	width  int
 	height int
 	// additional list of pointers pairs to the all holes
@@ -30,7 +30,7 @@ func (f *Field) GetHeight() int {
 }
 
 func (f *Field) GetCell(x, y int) *Cell {
-	return &f.cells[y*f.height+x]
+	return f.cells[y*f.height+x]
 }
 
 func (f *Field) GetState() GameState {
@@ -181,14 +181,14 @@ func NewField(gs *GameSettings) (*Field, error) {
 	pfield.State = GameStateInProgress
 	pfield.openCells = 0
 
-	cells := make([]Cell, gs.Height*gs.Width)
+	cells := make([]*Cell, gs.Height*gs.Width)
 
 	for i := 0; i < holesNumber; i++ {
-		cells[i] = Cell{State: CellStateClosed, HolesNumber: ThisIsHoleMarker}
+		cells[i] = &Cell{State: CellStateClosed, HolesNumber: ThisIsHoleMarker}
 	}
 
 	for i := holesNumber; i < len(cells); i++ {
-		cells[i] = Cell{State: CellStateClosed, HolesNumber: 0}
+		cells[i] = &Cell{State: CellStateClosed, HolesNumber: 0}
 	}
 
 	// seed random generator

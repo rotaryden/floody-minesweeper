@@ -164,26 +164,26 @@ func NewUI() *UI {
 	ui.isUnicode = ynQuestion("Play Unicode version (best on Ubuntu terminal)")
 
 	gs.Height = getValidAnswer(
-		fmt.Sprintf("Game field Height (%d < height < %d): ", GameSettingsMinHeight, GameSettingsMaxHeight),
+		fmt.Sprintf("Game field Height (%d <= height <= %d): ", GameSettingsMinHeight, GameSettingsMaxHeight),
 		func(ans string) (bool, int) {
 			res, e := strconv.Atoi(ans)
-			return e == nil && res > GameSettingsMinHeight && res < GameSettingsMaxHeight, res
+			return e == nil && res >= GameSettingsMinHeight && res <= GameSettingsMaxHeight, res
 		},
 	)
 
 	gs.Width = getValidAnswer(
-		fmt.Sprintf("Game field Width (%d < width < %d): ", GameSettingsMinWidth, GameSettingsMaxWidth),
+		fmt.Sprintf("Game field Width (%d <= width <= %d): ", GameSettingsMinWidth, GameSettingsMaxWidth),
 		func(ans string) (bool, int) {
 			res, e := strconv.Atoi(ans)
-			return e == nil && res > GameSettingsMinWidth && res < GameSettingsMaxWidth, res
+			return e == nil && res >= GameSettingsMinWidth && res <= GameSettingsMaxWidth, res
 		},
 	)
 
 	gs.HolesNumber = getValidAnswer(
-		fmt.Sprintf("Number of holes (0 < width < %d): ", gs.Height*gs.Width),
+		fmt.Sprintf("Number of holes (0 < width <= %d): ", gs.Height*gs.Width),
 		func(ans string) (bool, int) {
 			res, e := strconv.Atoi(ans)
-			return e == nil && res > 0 && res < gs.Height*gs.Width, res
+			return e == nil && res > 0 && res <= gs.Height*gs.Width, res
 		},
 	)
 

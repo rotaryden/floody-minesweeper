@@ -92,7 +92,7 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 
 	stack := NewStack[Point]()
 
-	// Point is a small structure without side effects, store by-value
+	// Point is a small structure without side effects and references, store by-value
 	stack.Push(Point{x, y})
 
 	for point, ok := stack.Pop(); ok; point, ok = stack.Pop() {
