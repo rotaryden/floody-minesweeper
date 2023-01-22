@@ -2,7 +2,7 @@
 Proxx Test project
 
 ## Run 
-Compiled executables should be present in the archive ./build folder
+Compiled executables should be present in the ./build folder
 
 on Linux (tested on Ubuntu 22.04):
 ```
@@ -11,7 +11,7 @@ on Linux (tested on Ubuntu 22.04):
 
 on Windows 64
 ```
-    ./build/proxx.exe
+    build\proxx.exe
 ```
 
 on OSX (not tested)
@@ -53,7 +53,7 @@ do
     go build -o build/<name_your_executable> ./src
 ```
 
-## Algorithms
+## Note on algorithms
 
 The free space revealing algorithm appeared a bit challenging from the logic point,
 as decision was to try to adapt an efficient non-recursive flood-fill algorithm for  
