@@ -112,6 +112,9 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 				stack.Push(Point{dx, lineY - 1})
 				spanAbove = true
 			} else if spanAbove && lineY > 0 && !field.IsFillable(dx, (lineY-1)) {
+				// reject to span above into the above adjacent cell close to the previous adjacent cell, 
+				// where we''ve already spawn
+				// but will step into the next above cell on the right, if needed
 				spanAbove = false
 			}
 
