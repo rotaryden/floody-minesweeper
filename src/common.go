@@ -9,6 +9,13 @@ const (
 	GameStateWin
 )
 
+// Point abstraction
+type Point struct {
+	X int
+	Y int
+}
+
+
 // common part of interfaces (mixin)
 type IMeasurable interface {
 	// abstract width

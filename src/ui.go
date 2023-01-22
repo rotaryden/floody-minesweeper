@@ -187,7 +187,7 @@ func NewUI() *UI {
 		},
 	)
 
-	fmt.Println("\n")
+	fmt.Printf("\n\n")
 
 	ui.gameSettings = gs
 
