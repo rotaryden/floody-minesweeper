@@ -141,6 +141,10 @@ func (ui *UI) GameTurn() Point {
 			var e error
 			// convert second part - number strin into Y coordinate
 			p.Y, e = strconv.Atoi(ans[1:])
+			//version2: boundary bug-fix
+			if p.X >= ui.gameSettings.Width || p.Y >= ui.gameSettings.Height {
+				return false, p
+			}
 			return e == nil && p.X < GameSettingsMaxWidth, p
 		},
 	)
