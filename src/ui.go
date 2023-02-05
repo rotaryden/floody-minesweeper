@@ -123,15 +123,22 @@ func (ui *UI) printTurnFooter() {
 	fmt.Println("----------------------------------")
 }
 
-func (ui *UI) GameTurn() Point {
+// returns valid point, or signals that game asked to be stopped
+func (ui *UI) GameTurn() (point Point, gameStopped bool) {
 	ui.printHeader()
 	ui.printField()
 	ui.printTurnFooter()
 
 	return getValidAnswer(
-		"What cell to open? (input e.g. b2, e6, j18): ",
+		"What cell to open? (input e.g. b2, e6, j18. * - to restart the game): ",
 		func(ans string) (bool, Point) {
 			p := Point{}
+			//version 2: restart game by *
+			if ans == "*" {
+				gameStopped = true
+				return true, p
+			}
+
 			if len(ans) < 2 {
 				return false, p
 			}
@@ -147,7 +154,7 @@ func (ui *UI) GameTurn() Point {
 			}
 			return e == nil && p.X < GameSettingsMaxWidth, p
 		},
-	)
+	), gameStopped
 
 }
 
