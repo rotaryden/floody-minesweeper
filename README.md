@@ -1,5 +1,5 @@
-# Proxx Test
-Proxx Test project
+# Floody MinesWeeper
+Floody MinesWeeper project
 
 The motivation is to make a Go implementation of the well-known Minesweeper game variation,
 using non-recursive flood-fill variation of the free area opening algorithm,
@@ -12,17 +12,17 @@ Compiled executables may be run like this
 
 on Linux (tested on Ubuntu 22.04):
 ```
-    ./build/proxx
+    ./build/floody-minesweeper
 ```
 
 on Windows 64
 ```
-    build\proxx.exe
+    build\floody-minesweeper.exe
 ```
 
 on OSX (not tested)
 ```
-    ./build/proxx_osx
+    ./build/floody-minesweeper_osx
 ```
 
 ## Gameplay
@@ -61,7 +61,7 @@ from the project root, do
 
 The free space revealing algorithm appeared a bit challenging from the logic point,
 as decision was to try to adapt an efficient non-recursive flood-fill algorithm for  
-opening free areas with border of hole-adjacent cells (with counters),
+opening free areas with border of mine-adjacent cells (with counters),
 
 so the main challenge was to provide the IsFillable() predicate classifying
 free cells and bordering counter cells to the same "color" class (in terms of flood-fill)

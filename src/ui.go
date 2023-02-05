@@ -56,12 +56,12 @@ func (ui *UI) printField() {
 	w := ui.f.GetWidth()
 
 	closedPic := "🙫"
-	holePic := "⦿"
+	minePic := "⦿"
 	freePic := "⛶"
 	picFmt := "%s "
 	if !ui.isUnicode {
 		closedPic = "##"
-		holePic = "**"
+		minePic = "**"
 		freePic = "[]"
 		picFmt = "%s"
 	}
@@ -81,12 +81,12 @@ func (ui *UI) printField() {
 			case pc.State == CellStateClosed:
 				// add space after placeholder "%s " to fix wide rune printing issue
 				fmt.Printf(picFmt, closedPic)
-			case pc.HolesNumber == ThisIsHoleMarker:
-				fmt.Printf(picFmt, holePic)
-			case pc.HolesNumber == 0:
+			case pc.MinesNumber == ThisIsMineMarker:
+				fmt.Printf(picFmt, minePic)
+			case pc.MinesNumber == 0:
 				fmt.Printf(picFmt, freePic)
 			default:
-				fmt.Printf("%d ", pc.HolesNumber)
+				fmt.Printf("%d ", pc.MinesNumber)
 			}
 		}
 		fmt.Println()
@@ -94,8 +94,8 @@ func (ui *UI) printField() {
 	fmt.Println("\nLegend:")
 	fmt.Printf("%s - closed\n", closedPic)
 	fmt.Printf("%s - free\n", freePic)
-	fmt.Println("1 - hole-adjacent counter")
-	fmt.Printf("%s - hole\n\n", holePic)
+	fmt.Println("1 - mine-adjacent counter")
+	fmt.Printf("%s - mine\n\n", minePic)
 }
 
 func (ui *UI) getPrintableGameStatus() string {
@@ -112,9 +112,9 @@ func (ui *UI) getPrintableGameStatus() string {
 }
 
 func (ui *UI) printHeader() {
-	fmt.Println("\n\n\n==================================")
-	fmt.Println("============= Proxx ==============")
-	fmt.Println("==================================")
+	fmt.Println("\n\n\n=======================================================")
+	fmt.Println(      "================= Floody MinesWeeper ==================")
+	fmt.Println(      "=======================================================")
 }
 
 func (ui *UI) printTurnFooter() {
@@ -178,7 +178,7 @@ func NewUI() *UI {
 
 func (ui *UI) Restart(){
 	ui.printHeader()
-	fmt.Println("*** Create New Game ****")
+	fmt.Println("\n****************** Create New Game ********************")
 	gs := &GameSettings{}
 	gs.Height = getValidAnswer(
 		fmt.Sprintf("Game field Height (%d <= height <= %d): ", GameSettingsMinHeight, GameSettingsMaxHeight),
@@ -196,8 +196,8 @@ func (ui *UI) Restart(){
 		},
 	)
 
-	gs.HolesNumber = getValidAnswer(
-		fmt.Sprintf("Number of holes (0 < width <= %d): ", gs.Height*gs.Width),
+	gs.MinesNumber = getValidAnswer(
+		fmt.Sprintf("Number of mines (0 < width <= %d): ", gs.Height*gs.Width),
 		func(ans string) (bool, int) {
 			res, e := strconv.Atoi(ans)
 			return e == nil && res > 0 && res <= gs.Height*gs.Width, res

@@ -15,9 +15,9 @@ type Field struct {
 	cells  []*Cell
 	width  int
 	height int
-	// additional list of pointers to the all hole cells 
-	// - needed for quick reveal of all holes on game over
-	holesRefs []*Cell
+	// additional list of pointers to the all mine cells 
+	// - needed for quick reveal of all mines on game over
+	minesRefs []*Cell
 	// simple game state
 	openCells int
 	State     GameState
@@ -65,12 +65,12 @@ func (f *Field) walkNeighbours(x, y int, worker func(*Cell) bool) {
 }
 
 // This is a central classifying predicate in the flood-fill algorithm
-// it is responsible for classify connected free cells area with adjacent border of counter cells (hole-adjacent cells)
+// it is responsible for classify connected free cells area with adjacent border of counter cells (mine-adjacent cells)
 func (f *Field) IsFillable(x, y int, isFirstCell bool) bool {
 	// if cell has been open - it should not take part in free-area roll down,
-	// as wel las if it is a Hole - holes are handled in the fill() immediatelly
+	// as wel las if it is a Mine - mines are handled in the fill() immediatelly
 	pc := f.GetCell(x, y)
-	if pc.State == CellStateOpen || pc.HolesNumber == ThisIsHoleMarker {
+	if pc.State == CellStateOpen || pc.MinesNumber == ThisIsMineMarker {
 		return false
 	}
 
@@ -87,11 +87,11 @@ func (f *Field) IsFillable(x, y int, isFirstCell bool) bool {
 	//  7 ⛶ 1 1 1 ⛶ ⛶ ⛶ 1 1 1 
 	//  8 ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ 
 	//  9 ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ 
-	if pc.HolesNumber == 0 && isFirstCell {
+	if pc.MinesNumber == 0 && isFirstCell {
 		return true
 	}
 
-	// if it is a hole-adjacent cell with a counter - whe should make sure it is adjacent also to a clear-free (non-adjacent) cell
+	// if it is a mine-adjacent cell with a counter - whe should make sure it is adjacent also to a clear-free (non-adjacent) cell
 	// moreover, this cell should be open to mitigate situations like this (h3 is ahjacent to 2 independent free regions):
 	// 	   a b c d e f g h i j
 	//  0 🙫 2 🙫 1 ⛶ ⛶ ⛶ 1 🙫 🙫
@@ -108,7 +108,7 @@ func (f *Field) IsFillable(x, y int, isFirstCell bool) bool {
 	// this way we will expand only to the borders (with counters) of the free area, no more
 	hasFreeOpenNeighbour := false
 	f.walkNeighbours(x, y, func(c *Cell) bool {
-		if c.HolesNumber == 0 && c.State == CellStateOpen {
+		if c.MinesNumber == 0 && c.State == CellStateOpen {
 			hasFreeOpenNeighbour = true
 			return true //stop walking through neighbours
 		}
@@ -123,18 +123,18 @@ func (f *Field) Fill(x, y int) {
 	pc := f.GetCell(x, y)
 	pc.State = CellStateOpen
 	f.openCells++
-	// if all cells are open exept holes, the nwe won
+	// if all cells are open exept mines, the nwe won
 	// - this will be processed at a higher level in OpenCell()
 }
 
-func (f *Field) revealHoles() {
-	for _, h := range f.holesRefs {
+func (f *Field) revealMines() {
+	for _, h := range f.minesRefs {
 		h.State = CellStateOpen
 	}
 }
 
-// OpenCell opens a cell on the field and changes game state if it is a Hole.
-// If the cell has no adjacent holes (clear-free cell), then all free region is opened
+// OpenCell opens a cell on the field and changes game state if it is a Mine.
+// If the cell has no adjacent mines (clear-free cell), then all free region is opened
 func (f *Field) OpenCell(p Point) GameState {
 	pc := f.GetCell(p.X, p.Y)
 
@@ -143,31 +143,31 @@ func (f *Field) OpenCell(p Point) GameState {
 		return 0
 	}
 
-	if pc.HolesNumber == ThisIsHoleMarker {
-		// now, we have to reveal all holes:
-		f.revealHoles()
+	if pc.MinesNumber == ThisIsMineMarker {
+		// now, we have to reveal all mines:
+		f.revealMines()
 
 		f.State = GameStateLoose
 		// game state is clear - return
 		return f.State
 	}
 
-	if pc.HolesNumber > 0 {
-		// this is a hole-adjacent cell, we should open just it
+	if pc.MinesNumber > 0 {
+		// this is a mine-adjacent cell, we should open just it
 		pc.State = CellStateOpen
 		f.openCells++
 
-	} else /*if f.Holes == 0*/ {
-		// f.Holes == 0 - this is a clear-free (non-adjacent) cell,
+	} else /*if f.Mines == 0*/ {
+		// f.Mines == 0 - this is a clear-free (non-adjacent) cell,
 		// we should flood-fill adjacent free cells and its border with open action
 		FloodFill(p.X, p.Y, f)
 	}
 
-	if f.openCells >= len(f.cells)-len(f.holesRefs) {
-		// all have been open except holes - we Won!!!
+	if f.openCells >= len(f.cells)-len(f.minesRefs) {
+		// all have been open except mines - we Won!!!
 		f.State = GameStateWin
-		// yet still good to show all holes
-		f.revealHoles()
+		// yet still good to show all mines
+		f.revealMines()
 	}
 
 	return f.State
@@ -178,10 +178,10 @@ func NewField(gs *GameSettings) (*Field, error) {
 	pfield := new(Field)
 	pfield.width = gs.Width
 	pfield.height = gs.Height
-	holesNumber := gs.HolesNumber
+	minesNumber := gs.MinesNumber
 
-	if holesNumber > gs.Height*gs.Width {
-		return nil, errors.New("holesNumber > height * width")
+	if minesNumber > gs.Height*gs.Width {
+		return nil, errors.New("minesNumber > height * width")
 	}
 
 	pfield.State = GameStateInProgress
@@ -189,41 +189,41 @@ func NewField(gs *GameSettings) (*Field, error) {
 
 	cells := make([]*Cell, gs.Height*gs.Width)
 
-	for i := 0; i < holesNumber; i++ {
-		cells[i] = &Cell{State: CellStateClosed, HolesNumber: ThisIsHoleMarker}
+	for i := 0; i < minesNumber; i++ {
+		cells[i] = &Cell{State: CellStateClosed, MinesNumber: ThisIsMineMarker}
 	}
 
-	for i := holesNumber; i < len(cells); i++ {
-		cells[i] = &Cell{State: CellStateClosed, HolesNumber: 0}
+	for i := minesNumber; i < len(cells); i++ {
+		cells[i] = &Cell{State: CellStateClosed, MinesNumber: 0}
 	}
 
 	// seed random generator
 	rand.Seed(time.Now().UnixNano())
-	// Now, make holes to be normally distributed over the field
+	// Now, make mines to be normally distributed over the field
 	rand.Shuffle(len(cells), func(i, j int) {
 		cells[i], cells[j] = cells[j], cells[i]
 	})
 
 	pfield.cells = cells
-	// Holes contains pointers to actual cells
-	pfield.holesRefs = make([]*Cell, holesNumber)
+	// Mines contains pointers to actual cells
+	pfield.minesRefs = make([]*Cell, minesNumber)
 
-	// Now, find all coordinates for shuffled holes and
-	holeIndex := 0
+	// Now, find all coordinates for shuffled mines and
+	mineIndex := 0
 	for y := 0; y < pfield.height; y++ {
 		for x := 0; x < pfield.width; x++ {
 			pc := pfield.GetCell(x, y)
-			// if this is a hole
-			if pc.HolesNumber == ThisIsHoleMarker {
-				// And hole's cell to the f.holesRefs array for direct tracking
-				pfield.holesRefs[holeIndex] = pc
-				holeIndex++
+			// if this is a mine
+			if pc.MinesNumber == ThisIsMineMarker {
+				// And mine's cell to the f.minesRefs array for direct tracking
+				pfield.minesRefs[mineIndex] = pc
+				mineIndex++
 
-				// increment hole-adjacent cells' counters
+				// increment mine-adjacent cells' counters
 				pfield.walkNeighbours(x, y, func(pcc *Cell) bool {
-					// if this is not a hole - increase it hole-adjacent counter
-					if pcc.HolesNumber != ThisIsHoleMarker {
-						pcc.HolesNumber++
+					// if this is not a mine - increase it mine-adjacent counter
+					if pcc.MinesNumber != ThisIsMineMarker {
+						pcc.MinesNumber++
 					}
 					return false
 				})

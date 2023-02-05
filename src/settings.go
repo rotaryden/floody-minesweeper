@@ -10,7 +10,7 @@ const (
 type GameSettings struct {
 	Height int
 	Width int
-	HolesNumber int
+	MinesNumber int
 }
 
 

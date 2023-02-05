@@ -1,7 +1,7 @@
 package main
 
-// denotes the given cel is a hole
-const ThisIsHoleMarker = 1000
+// denotes the given cel is a mine
+const ThisIsMineMarker = 1000
 
 type CellState int
 
@@ -12,12 +12,12 @@ const (
 )
 
 
-// Cell sructure, intended to be minimal - HoleNumbers is enough to hold any free/hole configurations
+// Cell sructure, intended to be minimal - MineNumbers is enough to hold any free/mine configurations
 type Cell struct {
 	State CellState
-	// HolesNumber == 0 - free cell
-	// > 0 < HoleMarker - Hole-adjacent cell
-	// == HoleMarker = is a hole
-	HolesNumber int
+	// MinesNumber == 0 - free cell
+	// > 0 < MineMarker - Mine-adjacent cell
+	// == MineMarker = is a mine
+	MinesNumber int
 }
 
