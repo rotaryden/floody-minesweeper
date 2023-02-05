@@ -64,15 +64,22 @@ For this purpose, isFirstCell parameter was added, to distinguish whether this i
 trying to be opened, as this appeared to be critical for rejecting non-connected regions
 (see additional comments in the code) 
 
+## version2 fixes
+- boundary fix for cell names , e.g. "b2" should be in scope of [a..width] [0...height]
+
 ## References used
 https://en.wikipedia.org/wiki/Flood_fill
 
 https://lodev.org/cgtutor/floodfill.html
 
 
-## Bug history screenshots
+## Bugs
 screenshots/fixed_bug*.png - some flood-fill/IsFillable() and index arithmetic bugs 
-I had to mitigate during development 
+
+*Known bug:* TODO, see screenshot known_bug__line_scan_not_reaching_left.png - 
+    when line scan flood-fill algorithm is on the stage when searching for left-most end of the free line to be fileld, 
+    proper isFillable predicate should be provided, standard one is not working, as cells to the right on this line stay closed,
+    and predicate has a protextion from double opened areas. 
 
 ## Copyright
 
