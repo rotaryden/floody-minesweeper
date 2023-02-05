@@ -5,6 +5,8 @@ The motivation is to make a Go implementation of the well-known Minesweeper game
 using non-recursive flood-fill variation of the free area opening algorithm,
 and number of data structures with generics.
 
+Best playable in the Linux terminal with proper unicode support.
+
 ## Run 
 Compiled executables may be run like this
 
