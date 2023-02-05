@@ -27,21 +27,22 @@ on OSX (not tested)
 
 ## Gameplay
 
-Game runs in the terminal, UI is textual.
+Game runs in the terminal, textual UI.
 
-Game asks questions about settings and then about turns.
+Game asks questions about UI settings and then about turns.
 
 The first question - whether you want to play Unicode variant -
 this is good looking on Ubuntu terminal at least.
 (screenshots made from Ubunut terminal with Unicode version)
-For Windows - there were issues with Unicode symbols, it is better to play ASCII.
 
-Anyway, best to have a fixed font in your terminal
+For Windows - there were issues with Unicode, it is better to play ASCII.
+
+Best to have a fixed font in your terminal
 
 screenshots/gameplay*.png - some gameplay samples.
 
 ## Build: Linux
-Prerequisite: golang 1.19 should be installed
+Prerequisite: latest golang should be installed
 
 On Linux, to build for ALL platforms, run
 
@@ -82,10 +83,12 @@ https://lodev.org/cgtutor/floodfill.html
 ## Bugs
 screenshots/fixed_bug*.png - some flood-fill/IsFillable() and index arithmetic bugs 
 
-*Known bug:* TODO, see screenshot known_bug__line_scan_not_reaching_left.png - 
+Known bug 1 (believed to be fixed):  see screenshot known_bug__line_scan_not_reaching_left.png - 
     when line scan flood-fill algorithm is on the stage when searching for left-most end of the free line to be fileld, 
     proper isFillable predicate should be provided, standard one is not working, as cells to the right on this line stay closed,
     and predicate has a protextion from double opened areas. 
+
+Possible bug 2: opening dis-joint free area via a diagonal free neighbour. Needs more investigations.
 
 ## Copyright
 
