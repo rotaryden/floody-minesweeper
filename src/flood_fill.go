@@ -34,6 +34,10 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 
 		// move to the very left cell of the current connected region on the row
 		for dx >= 0 && field.IsFillable(dx, lineY, isFirstCell) {
+			//change to original scan-line flood-fill algorithm - 
+			//   pre-fill - actually a bugfix for the unfillable left-most area on the scanned line
+			field.Fill(dx, lineY)  
+			isFirstCell = false
 			dx--
 		}
 		dx++
@@ -41,9 +45,12 @@ func FloodFill(x, y int, field IFloodableField) FillEvent {
 		spanAbove := false
 		spanBelow := false
 
-		for dx < width && field.IsFillable(dx, lineY, isFirstCell) {
-			field.Fill(dx, lineY)
-			isFirstCell = false
+		for dx < width && (dx <= point.X || field.IsFillable(dx, lineY, isFirstCell)) {
+			//do not fill pre-filled 
+			if dx > point.X { 
+				field.Fill(dx, lineY) 
+				isFirstCell = false
+			}
 
 			// check adjucent cells from the row above and push to stack
 			if !spanAbove && lineY > 0 && field.IsFillable(dx, (lineY-1), isFirstCell) {
