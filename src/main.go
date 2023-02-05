@@ -20,7 +20,9 @@ func main(){
 		}
 		// make first turn to display field and ask for the first cell to open, then open this cell, 
 		// then repeat this process, every time checking the game state after CellOpen()
-		for point, gameStopped := ui.GameTurn(); ! gameStopped && f.OpenCell(point) == GameStateInProgress; point, gameStopped = ui.GameTurn() {}
+		for point, gameStopped := ui.GameTurn(); 
+			! gameStopped && f.OpenCell(point) == GameStateInProgress; 
+			point, gameStopped = ui.GameTurn() {}
 
 		// Run GameEndedUI to report outcome of the game and ask question about continuation
 		// If user wants to continue - it would return true
