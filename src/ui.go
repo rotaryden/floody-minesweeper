@@ -168,12 +168,18 @@ func (ui *UI) GameEnded() bool {
 
 func NewUI() *UI {
 	ui := &UI{}
-	gs := &GameSettings{}
+
 	ui.printHeader()
-	fmt.Println("*** Create New Game ****")
 
 	ui.isUnicode = ynQuestion("Play Unicode version (best on Ubuntu terminal)")
+	
+	return ui
+}
 
+func (ui *UI) Restart(){
+	ui.printHeader()
+	fmt.Println("*** Create New Game ****")
+	gs := &GameSettings{}
 	gs.Height = getValidAnswer(
 		fmt.Sprintf("Game field Height (%d <= height <= %d): ", GameSettingsMinHeight, GameSettingsMaxHeight),
 		func(ans string) (bool, int) {
@@ -201,6 +207,4 @@ func NewUI() *UI {
 	fmt.Printf("\n\n")
 
 	ui.gameSettings = gs
-
-	return ui
 }
