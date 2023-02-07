@@ -95,3 +95,5 @@ Possible bug 2: opening dis-joint free area via a diagonal free neighbour. Needs
 ## Copyright
 
 Denys Volokhovskyi <rotaryden.gmail.com>
+
+MIT License
