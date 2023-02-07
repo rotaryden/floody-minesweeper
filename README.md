@@ -1,7 +1,9 @@
 # Floody MinesWeeper
-Floody MinesWeeper project
+![Floody MinesWeeper](/images/title.png)
 
-The motivation is to make a Go implementation of the well-known Minesweeper game variation,
+Minesweeper implementation
+
+The motivation is to make a custom Go implementation of the well-known Minesweeper game,
 using non-recursive flood-fill variation of the free area opening algorithm,
 and number of data structures with generics.
 
