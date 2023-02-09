@@ -9,7 +9,12 @@ and number of data structures with generics.
 
 Best playable in the Linux terminal with proper unicode support.
 
-## Run 
+## Run from release 
+Download latest binary for your OS from 
+[Releases](https://github.com/rotaryden/floody-minesweeper/releases)
+and run in a terminal with good unicode support (for unicode ui)
+
+## Compile and Run 
 Compiled executables may be run like this
 
 on Linux (tested on Ubuntu 22.04):
