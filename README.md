@@ -14,22 +14,28 @@ Download latest binary for your OS from
 [Releases](https://github.com/rotaryden/floody-minesweeper/releases)
 and run in a terminal with good unicode support (for unicode ui)
 
-## Compile and Run 
-Compiled executables may be run like this
+## Build and run: Linux
+Prerequisite: latest golang should be installed
+tested on Ubuntu 22.04
 
-on Linux (tested on Ubuntu 22.04):
+to build and run
 ```
+    ./build.sh all
     ./build/floody-minesweeper
 ```
 
-on Windows 64
+to build for ALL 3 platforms
 ```
-    build\floody-minesweeper.exe
+    ./build.sh all
 ```
+executables will be in the ./build folder
 
-on OSX (not tested)
+
+## Build and run: other platforms
+from the project root, do
 ```
-    ./build/floody-minesweeper_osx
+    go build -o build/<name_your_executable> ./src
+    build/<name_your_executable>
 ```
 
 ## Gameplay
@@ -47,23 +53,6 @@ For Windows - there were issues with Unicode, it is better to play ASCII.
 Best to have a fixed font in your terminal
 
 screenshots/gameplay*.png - some gameplay samples.
-
-## Build: Linux
-Prerequisite: latest golang should be installed
-
-On Linux, to build for ALL platforms, run
-
-```
-    ./build.sh all
-```
-
-executables will be in the ./build folder
-
-## Build: on other platforms
-from the project root, do
-```
-    go build -o build/<name_your_executable> ./src
-```
 
 ## Note on algorithms
 
